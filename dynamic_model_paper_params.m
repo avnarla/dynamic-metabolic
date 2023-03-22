@@ -337,14 +337,6 @@ figure(13)
 clf;
 subplot(2,2,1)
 for t=1:length(time)
-    %     if glc(t)>1e-3
-    %         %env(t)=5-glc(t);
-    %         env(t)=glc(t)+met(t)+acc(t)+pyr(t);
-    %     else
-    %         %env(t)=-met(t);
-    %         env(t)=5+0.1*(2-met(t));
-    %         env(t)=glc(t)+met(t)+acc(t)+pyr(t);
-    %     end
     env(t)=40-(2*acc(t)+8*glc(t)+3*met(t));
 end
 s=plot((env(3:end-2))/40,(rhoA(4:end-1)-rhoA(3:end-2))./rhoA(3:end-2)/dt,'Linewidth',5,'Color','#EF4445')
@@ -393,75 +385,7 @@ zlabel('Pyruvate (in mM)')
 zlim([0,3])
 set(gca,'fontsize', 24);
 
-%%
-%T=16;
-if 1==0
-    num_steps=48/dt;
-    rhoA=zeros(num_steps,1);
-    rhoB=zeros(num_steps,1);
-    sigma=zeros(num_steps,1); % Lag time is stored as a function of accetate exposure
-    met=zeros(num_steps,1);
-    acc=zeros(num_steps,1);
-    glc=zeros(num_steps,1);
-    count=0;
-    rhoA(1)=1e-2;
-    rhoB(1)=1e-2;
-    met(1)=0;
-    acc(1)=0;
-    glc(1)=glcnac_list;
-    sigma(1)=sigma_min;
-    
-    % Time evolution
-    for i=1:num_steps-1
-        if acc(i)>=EA2 % Death
-            sigma(i+1)=min(sigma(i)+(dt*acc(i)*sigma_str),sigma_max);
-            rhoA(i+1)=rhoA(i)-dt*deltaA*rhoA(i);
-            met(i+1)=met(i);
-            acc(i+1)=acc(i);
-            glc(i+1)=glc(i);
-        elseif acc(i)>=EA1  % Acid stress
-            sigma(i+1)=min(sigma(i)+(dt*acc(i)*sigma_str),sigma_max); % Increase lag time for glcnac to catch up to, up to maximum
-            rhoA(i+1)=rhoA(i);
-            met(i+1)=met(i)+dt*mu_str_AM*rhoA(i)*glc(i)/(glc(i)+KAG);
-            acc(i+1)=acc(i)+dt*mu_str_AE*rhoA(i)*glc(i)/(glc(i)+KAG);
-            glc(i+1)=glc(i)-dt*mu_str_AG*rhoA(i)*glc(i)/(glc(i)+KAG);
-        else
-            if sigma(i)<sigma_c % Growth
-                sigma(i+1)=max(sigma(i)-dt*sigma_lag*glc(i)/(glc(i)+KAG),sigma_min); % Increase lag time for glcnac to catch up to, up to maximum
-                rhoA(i+1)=rhoA(i)+dt*rA*rhoA(i)*glc(i)/(glc(i)+KAG);
-                met(i+1)=met(i);
-                acc(i+1)=acc(i)+dt*rA*rhoA(i)/YAE*glc(i)/(glc(i)+KAG);
-                glc(i+1)=glc(i)-dt*rA*rhoA(i)/YAG*glc(i)/(glc(i)+KAG);
-            else % Lag
-                sigma(i+1)=sigma(i)-dt*sigma_lag*glc(i)/(glc(i)+KAG); % Increase lag time for glcnac to catch up to, up to maximum
-                rhoA(i+1)=rhoA(i);
-                met(i+1)=met(i)+dt*mu_lag_AM*rhoA(i)*glc(i)/(glc(i)+KAG);
-                acc(i+1)=acc(i)+dt*mu_lag_AE*rhoA(i)*glc(i)/(glc(i)+KAG);
-                glc(i+1)=glc(i)-dt*mu_lag_AG*rhoA(i)*glc(i)/(glc(i)+KAG);
-            end
-        end
-        
-        if acc(i)<EB1 %Growth on single substrates
-            rhoB(i+1)=rhoB(i)+dt*rhoB(i)*(rBE*acc(i)/(acc(i)+KBE)+rBM*met(i)/(met(i)+KBM)); %% For low acid, Monod growth on accetate
-            met(i+1)=met(i+1)-dt*rhoB(i)*rBM*met(i)/(met(i)+KBM)/YBM;
-            acc(i+1)=acc(i+1)-dt*rhoB(i)*rBE*acc(i)/(acc(i)+KBE)/YBE;
-        else % Combined growth
-            theta_B2=switch_fun(acc(i),rB_plus,0.0,EB2,1/deltaE); %% Accetate growth is a soft tanh function
-            rhoB(i+1)=rhoB(i)+dt*rhoB(i)*theta_B2*acc(i)/(acc(i)+KBE)*met(i)/(met(i)+KBM); %% For low acid, Monod growth on accetate
-            %met(i+1)=met(i+1)-(1-b)*dt*rhoB(i)*theta_B2*acc(i)/(acc(i)+KBE)*met(i)/(met(i)+KBM)/YBM;
-            %acc(i+1)=acc(i+1)-b*dt*rhoB(i)*theta_B2*acc(i)/(acc(i)+KBE)*met(i)/(met(i)+KBM)/YBE;
-            met(i+1)=met(i+1)-(1-b)*dt*rhoB(i)*theta_B2*acc(i)*met(i)/(acc(i)*met(i)+acc(i)*KBM+met(i)*KBE)/YBM;
-            acc(i+1)=acc(i+1)-b*dt*rhoB(i)*theta_B2*acc(i)*met(i)/(acc(i)*met(i)+acc(i)*KBM+met(i)*KBE)/YBE;
-        end
-        
-        rhoA(i+1)=rhoA(i+1)-dt*log(fold)/T*rhoA(i);
-        rhoB(i+1)=rhoB(i+1)-dt*log(fold)/T*rhoB(i);
-        met(i+1)=met(i+1)-dt*log(fold)/T*met(i);
-        acc(i+1)=acc(i+1)-dt*log(fold)/T*acc(i);
-        glc(i+1)=glc(i+1)-dt*log(fold)/T*glc(i)+glcnac_list*dt/T;
-        
-    end
-end
+
 %%
 figure(5)
 clf;
