@@ -1,5 +1,4 @@
-# Plot OD on first cycle, for both cocultures
-# Date: 3/10/22
+# Obtain OD from pickle file
 
 import pandas as pd
 import numpy as np
@@ -37,15 +36,6 @@ def get_odt(well,wavelength,sub,ls,ws,ad):
 		od = od - od[0]					# subtract off first timepoint if you say so
 	return od
 
-def cm2inch(*tupl):
-	'''Get the OD(t) at wavelength for well (str)'''
-	inch = 2.54
-	if isinstance(tupl[0], tuple):
-		return tuple(i/inch for i in tupl[0])
-	else:
-		return tuple(i/inch for i in tupl)
-
-
 ######## Extract Data #################
 
 with open('ecpp.pkl','rb') as f:
@@ -58,35 +48,7 @@ with open('cfpf.pkl','rb') as f:
 all_days_cfpf = all_days
 all_times_cfpf = t
 
-######## Plot Properties #################
-
-# OD properties (y axis)
-od_lim = [np.log(0.01),np.log(1.28)]   # OD_600 limit
-od_ticks_vals = np.array([0.01,0.02,0.04,0.08,0.16,0.32,0.64,1.28])
-od_ticks = np.log(od_ticks_vals)
-od_ticklabels = ['0.01','0.02','0.04','0.08','0.16','0.32','0.64','1.28']
-
-
-# t axis properties
-time_lim = [0,24]
-time_ticks = np.array([0,6,12,18,24])
-
-
-SMALL_SIZE = 7
-MEDIUM_SIZE = 8
-BIGGER_SIZE = 9
-
-plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
-
 ######## Plot #################
-numrows = 1
-numcols = 1
 fig,axs = plt.subplots(numrows,numcols,figsize=cm2inch(6,4.5),dpi=400)
 fig.subplots_adjust(bottom=0.34,top=0.85,right=0.71,left=0.25)
 
@@ -112,25 +74,7 @@ axs.set_xlabel('Time in 1st cycle (h)',fontname='Arial')
 
 # Cf/Pf
 axs.plot(t_cfpf,np.log(odt_mono+0.02),'--',color='k',alpha=0.6,label='Cf')
-axs.plot(t_cfpf,np.log(odt_co+0.02),'-',color='k',label='Cf+Pf')
-
-axs.set_ylim(od_lim)
-axs.set_yticks(od_ticks)
-axs.set_yticklabels(od_ticklabels)
-axs.set_xlim(time_lim)
-axs.set_xticks(time_ticks)
-
-for tick in axs.get_xticklabels():
-    tick.set_fontname("Arial")
-for tick in axs.get_yticklabels():
-    tick.set_fontname("Arial")        
-
-L = axs.legend(loc='lower right')
-plt.setp(L.texts, family='Arial')
-
-fig
-
-fig.savefig('CfPf_MonoCo_OD.png',format='png')
+axs.plot(t_cfpf,np.log(odt_co+0.02),'-',color='k',label='Cf+Pf')    
 
 
 
