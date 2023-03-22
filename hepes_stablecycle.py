@@ -1,8 +1,4 @@
 # Figures for plotting coculture simulation
-# Author: KA
-# Date: 8/10/20
-# Description: Plot the results from the 1/3/21 gr/dil experiment stable cycle neatly
-# (see ⁨Dropbox⁩ ▸ ⁨PostDoc⁩ ▸ ⁨Hwa⁩ ▸ ⁨Code_Data⁩ ▸ ⁨GlcNAcCocultures⁩ ▸ ⁨Growth_Dilution_1A01_3B05⁩ ▸ 200427_GrDilExpt)
 
 import numpy as np
 import matplotlib
