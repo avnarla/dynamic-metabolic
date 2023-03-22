@@ -49,7 +49,7 @@ all_days_cfpf = all_days
 all_times_cfpf = t
 
 ######## Plot #################
-fig,axs = plt.subplots(numrows,numcols,figsize=cm2inch(6,4.5),dpi=400)
+fig,axs = plt.subplots(numrows,numcols,figsize=(6,4.5),dpi=400)
 fig.subplots_adjust(bottom=0.34,top=0.85,right=0.71,left=0.25)
 
 well_co = 'A1'
