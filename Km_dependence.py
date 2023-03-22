@@ -1,4 +1,4 @@
-# Km dependence
+# Figure to determine Km dependence
 # Author: KA
 # Date: 1/23/19
 
